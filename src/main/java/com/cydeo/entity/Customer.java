@@ -14,11 +14,11 @@ public class Customer extends BaseEntity {
     private String userName;
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.CUSTOMER;
 
     @OneToMany(mappedBy = "customer")
     private List<Address> addressList;

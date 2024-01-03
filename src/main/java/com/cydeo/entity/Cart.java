@@ -3,10 +3,7 @@ package com.cydeo.entity;
 import com.cydeo.enums.CartState;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 @Data

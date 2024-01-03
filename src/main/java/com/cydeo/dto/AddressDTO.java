@@ -11,5 +11,5 @@ public class AddressDTO{
     private String name;
     private String zipCode;
     private String street;
-    private Long customerId;
+    private CustomerDTO customer;
 }

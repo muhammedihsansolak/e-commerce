@@ -1,5 +1,15 @@
 package com.cydeo.enums;
 
 public enum PaymentMethod {
-    CREDIT_CARD, TRANSFER, BUY_NOW_PAY_LATER
+    CREDIT_CARD("Credit card"), TRANSFER("Transfer"), BUY_NOW_PAY_LATER("Buy now pay later");
+
+    final String paymentMethod;
+
+    PaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
 }

@@ -1,4 +1,4 @@
-package com.cydeo.dto;
+package com.cydeo.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
