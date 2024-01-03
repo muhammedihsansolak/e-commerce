@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -18,6 +19,8 @@ public class CustomerDTO {
     private String firstName;
     private String lastName;
     private String userName;
+
+    @Email
     private String email;
 
     @JsonIgnore

@@ -7,8 +7,8 @@ INSERT INTO public.category (name) VALUES ('Clothing');
 INSERT INTO public.category (name) VALUES ('Home and Kitchen');
 
 -- Sample Customers
-INSERT INTO public.customer (first_name, last_name, user_name, password, email, role) VALUES ('John', 'Doe', 'john_doe', 'password123', 'john.doe@email.com', 'CUSTOMER');
-INSERT INTO public.customer (first_name, last_name, user_name, password, email, role) VALUES ('Alice', 'Smith', 'alice_smith', 'securepass', 'alice.smith@email.com', 'CUSTOMER');
+INSERT INTO public.customer (first_name, last_name, user_name, password, email, role) VALUES ('John', 'Doe', 'john_doe', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK', 'john.doe@email.com', 'CUSTOMER');
+INSERT INTO public.customer (first_name, last_name, user_name, password, email, role) VALUES ('Alice', 'Smith', 'alice_smith', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK', 'alice.smith@email.com', 'CUSTOMER');
 
 -- Sample Addresses
 INSERT INTO public.address (name, zip_code, street, customer_id) VALUES ('Home', '12345', '123 Main St', 1);
