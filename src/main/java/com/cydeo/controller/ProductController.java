@@ -2,7 +2,7 @@ package com.cydeo.controller;
 
 
 import com.cydeo.dto.ProductDTO;
-import com.cydeo.dto.ProductRequest;
+import com.cydeo.dto.request.ProductRequest;
 import com.cydeo.dto.response.ResponseWrapper;
 import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +28,11 @@ public class ProductController {
                         HttpStatus.OK) );
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseWrapper> updateProduct(@RequestBody ProductDTO productDTO){
+    @PutMapping("{productCode}")
+    public ResponseEntity<ResponseWrapper> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("productCode")String productCode){
         return ResponseEntity
                 .ok(new ResponseWrapper("Product is updated!",
-                        productService.updateProduct(productDTO),
+                        productService.updateProduct(productDTO, productCode),
                         HttpStatus.CREATED ));
     }
 

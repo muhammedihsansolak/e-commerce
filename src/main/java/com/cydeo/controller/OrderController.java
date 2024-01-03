@@ -85,6 +85,20 @@ public class OrderController {
         );
     }
 
+    @PostMapping("/place-order/{paymentMethod}/{customerId}")
+    public ResponseEntity<ResponseWrapper> placeOrder(
+            @PathVariable("paymentMethod")String paymentMethod,
+            @PathVariable("customerId") Long customerId )
+    {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseWrapper.builder()
+                .message("Order placed successfully!")
+                .statusCode(201)
+                .success(true)
+                .data(orderService.placeOrder(paymentMethod, customerId))
+                .build()
+        );
+    }
 
 
 }

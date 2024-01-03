@@ -2,6 +2,7 @@ package com.cydeo.service.Impl;
 
 import com.cydeo.dto.DiscountDTO;
 import com.cydeo.entity.Discount;
+import com.cydeo.exception.DiscountNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.DiscountRepository;
 import com.cydeo.service.DiscountService;
@@ -26,20 +27,30 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public DiscountDTO update(DiscountDTO discountDTO) {
-        discountRepository.save(mapper.convert(discountDTO, new Discount()));
-        return discountDTO;
+    public DiscountDTO update(DiscountDTO discountDTO, String discountName) {
+        Discount foundDiscount = discountRepository.findByName(discountName)
+                .orElseThrow(() -> new DiscountNotFoundException("Discount not fount with name: " + discountName));
+
+        Discount discount = mapper.convert(foundDiscount, new Discount());
+        discount.setId(foundDiscount.getId());
+        Discount savedDiscount = discountRepository.save(discount);
+
+        return mapper.convert(savedDiscount, new DiscountDTO());
     }
 
     @Override
     public DiscountDTO createDiscount(DiscountDTO discountDTO) {
-        discountRepository.save( mapper.convert(discountDTO, new Discount()) );
-        return discountDTO;
+        Discount discount = mapper.convert(discountDTO, new Discount());
+        Discount savedDiscount = discountRepository.save(discount);
+
+        return mapper.convert(savedDiscount, new DiscountDTO());
     }
 
     @Override
-    public DiscountDTO getDiscountByName(String name) {
-        Discount discount = discountRepository.findFirstByName(name);
+    public DiscountDTO getDiscountByName(String discountName) {
+        Discount discount = discountRepository.findByName(discountName)
+                .orElseThrow(() -> new DiscountNotFoundException("Discount not fount with name: " + discountName));
+
         return mapper.convert(discount, new DiscountDTO());
     }
 }

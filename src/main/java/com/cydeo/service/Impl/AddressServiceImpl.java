@@ -3,6 +3,8 @@ package com.cydeo.service.Impl;
 import com.cydeo.dto.AddressDTO;
 import com.cydeo.entity.Address;
 import com.cydeo.entity.Customer;
+import com.cydeo.exception.AddressNotFoundException;
+import com.cydeo.exception.CustomerNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.AddressRepository;
 import com.cydeo.repository.CustomerRepository;
@@ -29,15 +31,30 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDTO update(AddressDTO addressDTO) {
-        addressRepository.save( mapperUtil.convert(addressDTO, new Address()) );
-        return addressDTO;
+    public AddressDTO update(AddressDTO addressDTO, Long addressId) {
+        Address foundAddress = addressRepository.findById(addressId)
+                .orElseThrow(() -> new AddressNotFoundException("Address not found with id: " + addressId));
+
+        Address address = mapperUtil.convert(addressDTO, new Address());
+        address.setId(foundAddress.getId());
+        Address savedAddress = addressRepository.save(address);
+
+        return mapperUtil.convert(savedAddress, new AddressDTO());
+    }
+
+    @Override
+    public AddressDTO findAddressById(Long addressId) {
+        Address foundAddress = addressRepository.findById(addressId)
+                .orElseThrow(() -> new AddressNotFoundException("Address not found with id: " + addressId));
+
+        return mapperUtil.convert(foundAddress, new AddressDTO());
     }
 
     @Override
     public AddressDTO create(AddressDTO addressDTO) {
         Address addressToSave = mapperUtil.convert(addressDTO, new Address());
         Address savedAddress = addressRepository.save(addressToSave);
+
         return mapperUtil.convert(savedAddress,new AddressDTO());
     }
 
@@ -59,7 +76,9 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDTO> findAddressByCustomerIdAndName(Long customerId, String name) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow();
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: "+customerId));
+
         List<Address> list = addressRepository.findAllByCustomerAndName(customer, name);
 
         return list.stream()

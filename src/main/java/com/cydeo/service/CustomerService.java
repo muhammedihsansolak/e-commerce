@@ -7,7 +7,7 @@ import java.util.List;
 public interface CustomerService {
     List<CustomerDTO> getAllCustomers();
 
-    CustomerDTO updateCustomer(CustomerDTO customerDTO);
+    CustomerDTO updateCustomer(CustomerDTO customerDTO, String email);
 
     CustomerDTO create(CustomerDTO customerDTO);
 

@@ -29,11 +29,11 @@ public class DiscountController {
                 ));
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseWrapper> updateDiscount(@RequestBody DiscountDTO discountDTO){
+    @PutMapping("{discountName}")
+    public ResponseEntity<ResponseWrapper> updateDiscount(@RequestBody DiscountDTO discountDTO, @PathVariable("discountName")String discountName){
         return ResponseEntity.ok(new ResponseWrapper(
                 "Discount updated!",
-                discountService.update(discountDTO),
+                discountService.update(discountDTO, discountName),
                 HttpStatus.CREATED
         ));
     }

@@ -13,9 +13,9 @@ public interface CartService {
 
     CartDTO findById(Long id);
 
-    boolean addToCart(Customer customer, Long productId, Integer quantity);
+    boolean addToCart(Long customerId, Long productId, Integer quantity);
 
-    BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Cart cart);
+    BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Long cartId);
 
     BigDecimal calculateTotalCartAmount(List<CartItem> cartItemList);
 }

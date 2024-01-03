@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -33,4 +34,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select * from product p join product_category_rel pl on pl.p_id = p.id where pl.c_id in(?1) and p.price > ?2 " , nativeQuery = true)
     List<Product> retrieveProductListByCategoryAndPrice(List<Long> categoryId, BigDecimal price);
 
+    Optional<Product> findByProductCode(String productCode);
 }

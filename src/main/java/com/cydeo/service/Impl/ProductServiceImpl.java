@@ -1,8 +1,9 @@
 package com.cydeo.service.Impl;
 
 import com.cydeo.dto.ProductDTO;
-import com.cydeo.dto.ProductRequest;
+import com.cydeo.dto.request.ProductRequest;
 import com.cydeo.entity.Product;
+import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.ProductRepository;
 import com.cydeo.service.ProductService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,18 +30,29 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProduct(ProductDTO productDTO) {
-        Product foundProduct = productRepository.findById(productDTO.getId()).orElseThrow();
-        Product convertedProduct = mapper.convert(productDTO, new Product());
-        convertedProduct.setId(foundProduct.getId());
-        productRepository.save(convertedProduct);
-        return productDTO;
+    public ProductDTO updateProduct(ProductDTO productDTO, String productCode) {
+        Product foundProduct = productRepository.findByProductCode(productCode)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with product code: "+ productCode));
+
+        Product product = mapper.convert(productDTO, new Product());
+        product.setId(foundProduct.getId());
+        product.setProductCode(productCode);
+        Product savedProduct = productRepository.save(product);
+
+        return mapper.convert(savedProduct, new ProductDTO());
     }
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        productRepository.save( mapper.convert(productDTO, new Product()) );
-        return productDTO;
+        Product productToSave = mapper.convert(productDTO, new Product());
+
+        if (productDTO.getProductCode() == null) {
+            String productCode = UUID.randomUUID().toString();
+            productToSave.setProductCode(productCode);
+        }
+
+        Product savedProduct = productRepository.save(productToSave);
+        return mapper.convert(savedProduct, new ProductDTO());
     }
 
     @Override

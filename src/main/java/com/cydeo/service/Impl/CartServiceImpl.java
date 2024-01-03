@@ -4,11 +4,12 @@ import com.cydeo.dto.CartDTO;
 import com.cydeo.entity.*;
 import com.cydeo.enums.CartState;
 import com.cydeo.enums.DiscountType;
+import com.cydeo.exception.CartNotFoundException;
+import com.cydeo.exception.CustomerNotFoundException;
+import com.cydeo.exception.DiscountNotFoundException;
+import com.cydeo.exception.NotEnoughStockException;
 import com.cydeo.mapper.Mapper;
-import com.cydeo.repository.CartItemRepository;
-import com.cydeo.repository.CartRepository;
-import com.cydeo.repository.DiscountRepository;
-import com.cydeo.repository.ProductRepository;
+import com.cydeo.repository.*;
 import com.cydeo.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,36 +29,37 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
 
 
     @Override
     public CartDTO findById(Long id) {
-        return cartRepository.findById(id).stream()
-                .map(cart -> mapper.convert(cart, new CartDTO())).findFirst().orElseThrow();
+        Cart cart = cartRepository.findById(id)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found with id: " + id));
+
+        return mapper.convert(cart, new CartDTO());
     }
 
     public boolean existById(Long id) {
         return cartRepository.existsById(id);
     }
 
-    // if a customer would like to buy something, The customer needs to add to cart first.
-    // but clicking the Add To Cart button doesn't mean that it is guaranteed product will be added to cart.
-    // we have some validations and protections, This method will do the operation.
     @Override
-    public boolean addToCart(Customer customer, Long productId, Integer quantity) {
-        // we retrieve discount by name and if there is no product with the id, we need to throw exception
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product couldn't find"));
+    public boolean addToCart(Long customerId, Long productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product couldn't find"));
 
         // quantity that customer would like to buy needs to be bigger than product's remaining quantity
-        // if there is any problem with that, we have to throw exception otherwise our stock management will complain to sell products actually we don't have
         if (product.getRemainingQuantity() < quantity) {
-            throw new RuntimeException("Not enough stock");
+            throw new NotEnoughStockException("Not enough stock");
         }
 
-        // we retrieve customer's cart, is there no cart that belongs to the customer. No rush we can create one!
-        List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't found with id: "+ customerId));
+
+        // we retrieve customer's cart, if there is no cart that belongs to the customer we create one
         // we are checking, is there any cart, duplication, size
-        // if there is any problem we throw exception in checkCartCount method
+        List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
         Cart cart = checkCartCount(cartList, customer);
 
         // we retrieve cart item related with the product to decide product is already there or will be added new
@@ -76,36 +78,26 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(cartItem);
         }
 
-        // If everything goes well, we will return true. Otherwise we are throwing some exceptions.
         return true;
     }
 
-    // Customers always search for a discount, right? When you see a great discount you want to have, anyone does ?
-    // but clicking the Use Discount button doesn't mean that it is guaranteed discount will be added to cart.
-    // we have some validations and protections, This method will do the operation.
 
     @Override
-    public BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Cart cart) {
+    public BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Long cartId) {
         // we retrieve discount by name and if there is no discount with the name, we need to throw exception
-        Discount discount = discountRepository.findFirstByName(discountName);
-        if (discount == null) {
-            throw new RuntimeException("Discount couldn't find ");
+        Discount discount = discountRepository.findByName(discountName)
+                .orElseThrow(() -> new DiscountNotFoundException("Discount not found with discount name: "+discountName));
+
+        if (discount.getDiscount() == null || discount.getDiscount().compareTo(BigDecimal.ZERO) <= 0 ) {
+            throw new RuntimeException("Discount amount can not be null or smaller than 1");
         }
 
-        // discount amount also needs to had a value, otherwise we will throw exception
-        if (discount.getDiscount() == null) {
-            throw new RuntimeException("Discount amount can not be null ");
+        if (discount.getMinimumAmount() == null || discount.getMinimumAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Discount minimum amount can not be null or smaller than 1");
         }
 
-        // discount minimum amount also needs to had a value, otherwise we will throw exception
-        if (discount.getMinimumAmount() == null) {
-            throw new RuntimeException("Discount minimum amount can not be null ");
-        }
-
-        // discount minimum amount and discount amount also needs to had a value bigger than ZERO, otherwise we will throw exception
-        if (discount.getMinimumAmount().compareTo(BigDecimal.ZERO) <= 0 || discount.getDiscount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Discount amount needs be bigger than zero ");
-        }
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found with id : "+ cartId));
 
         // without having any item in cart, if customer try to add discount to cart we need to throw exception
         List<CartItem> cartItemList = cartItemRepository.findAllByCart(cart);
@@ -113,25 +105,21 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("There is no item in the cart");
         }
 
-        // we retrieve cart total amount to decide discount is applicable to the cart
         BigDecimal totalCartAmount = calculateTotalCartAmount(cartItemList);
 
         // if cart total amount less than discount minimum amount, no discount will be added to cart
-        // and discount amount will be ZERO, we are returning the response without assigning any discount value to cart
         if (discount.getMinimumAmount().compareTo(totalCartAmount) > 0) {
             return BigDecimal.ZERO;
         }
 
-        // if everything goes well we add discount to cart
         cart.setDiscount(discount);
         cartRepository.save(cart);
 
         // we are deciding which discount will be added to cart
-        // depends on the discount, we are calculating the discount amount and return
-        // if discount type amount based, we will return actual discount amount without calculation
-        //
         if (discount.getDiscountType().equals(DiscountType.RATE_BASED)) {
-            return totalCartAmount.multiply(discount.getDiscount()).divide(new BigDecimal(100), RoundingMode.FLOOR);
+            return totalCartAmount
+                    .multiply(discount.getDiscount())
+                    .divide(new BigDecimal(100), RoundingMode.FLOOR);
         } else {
             return discount.getDiscount();
         }
@@ -139,7 +127,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public BigDecimal calculateTotalCartAmount(List<CartItem> cartItemList) {
-        // this stream basically calculates the cart total amount depends on how many product is added to cart and theirs quantity
         Function<CartItem, BigDecimal> totalMapper = cartItem -> cartItem.getProduct().getPrice()
                 .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 
@@ -149,7 +136,6 @@ public class CartServiceImpl implements CartService {
     }
 
     public Cart createCartForCustomer(Customer customer) {
-        // if customer doesn't have cart before adding a product to cart, no need to throw exception. We can create one.
         Cart cart = new Cart();
         cart.setCartState(CartState.CREATED);
         cart.setCustomer(customer);
@@ -157,7 +143,6 @@ public class CartServiceImpl implements CartService {
     }
 
     private Cart checkCartCount(List<Cart> cartList, Customer customer) {
-        // if customer doesn't have cart before adding a product to cart, no need to throw exception. We can create one.
         if (cartList == null || cartList.size() == 0) {
             cartList = new ArrayList<>();
             Cart cart = createCartForCustomer(customer);

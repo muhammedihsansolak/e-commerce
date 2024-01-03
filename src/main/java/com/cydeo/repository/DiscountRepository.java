@@ -8,10 +8,11 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
-    Discount findFirstByName(String name);
+    Optional<Discount> findByName(String name);
 
     List<Discount> findAllByDiscountGreaterThan(BigDecimal amount);
 

@@ -26,11 +26,11 @@ public class AddressController {
                 ));
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseWrapper> updateAddress(@RequestBody AddressDTO addressDTO){
+    @PutMapping("{addressId}")
+    public ResponseEntity<ResponseWrapper> updateAddress(@RequestBody AddressDTO addressDTO, @PathVariable("addressId") Long addressId ){
         return ResponseEntity.ok(new ResponseWrapper(
                 "Address updated!",
-                addressService.update(addressDTO),
+                addressService.update(addressDTO, addressId),
                 HttpStatus.CREATED
         ));
     }

@@ -25,11 +25,11 @@ public class CustomerController {
         ));
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseWrapper> updateCustomer(@RequestBody CustomerDTO customerDTO){
+    @PutMapping("{email}")
+    public ResponseEntity<ResponseWrapper> updateCustomer(@RequestBody CustomerDTO customerDTO, @PathVariable("email") String email){
         return ResponseEntity.ok(new ResponseWrapper(
                 "Customer updated!",
-                customerService.updateCustomer(customerDTO),
+                customerService.updateCustomer(customerDTO, email),
                 HttpStatus.CREATED
         ));
     }
