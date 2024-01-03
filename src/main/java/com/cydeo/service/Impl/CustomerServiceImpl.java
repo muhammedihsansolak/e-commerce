@@ -34,6 +34,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         Customer customerToSave = mapper.convert(customerDTO, new Customer());
         customerToSave.setId(foundCustomer.getId());
+        customerToSave.setPassword(foundCustomer.getPassword());
         Customer savedCustomer = customerRepository.save(customerToSave);
 
         return mapper.convert(savedCustomer, new CustomerDTO());

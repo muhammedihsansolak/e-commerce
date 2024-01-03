@@ -16,7 +16,6 @@ public class Customer extends BaseEntity {
     private String userName;
     private String password;
 
-
     @Column(unique = true, updatable = false)
     private String email;
 
