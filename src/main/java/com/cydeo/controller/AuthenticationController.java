@@ -1,5 +1,9 @@
-package com.cydeo.security.auth;
+package com.cydeo.controller;
 
+import com.cydeo.security.auth.AuthenticationRequest;
+import com.cydeo.security.auth.AuthenticationResponse;
+import com.cydeo.security.auth.AuthenticationService;
+import com.cydeo.security.auth.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
