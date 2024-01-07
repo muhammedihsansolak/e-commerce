@@ -29,6 +29,7 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.builder()
                         .message("An error occurred!")
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .localDateTime(LocalDateTime.now())
                         .build()
                 );
     }
@@ -58,6 +59,7 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.builder()
                         .message(exception.getMessage())
                         .status(HttpStatus.NOT_FOUND)
+                        .localDateTime(LocalDateTime.now())
                         .build()
                 );
     }
@@ -70,6 +72,7 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.builder()
                         .message(exception.getMessage())
                         .status(HttpStatus.BAD_REQUEST)
+                        .localDateTime(LocalDateTime.now())
                         .build()
                 );
     }
