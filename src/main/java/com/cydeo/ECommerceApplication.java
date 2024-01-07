@@ -12,6 +12,6 @@ public class ECommerceApplication {
         SpringApplication.run(ECommerceApplication.class, args);
     }
 
-    //todo: -logging -openAPI3 -kafka -monitoring
+    //todo: -kafka -monitoring
 
 }

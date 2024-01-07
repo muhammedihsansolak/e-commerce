@@ -1,14 +1,17 @@
 package com.cydeo.exception.handler;
 
+import com.cydeo.dto.response.ExceptionResponse;
 import com.cydeo.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +29,19 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.builder()
                         .message("An error occurred!")
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build()
+                );
+    }
+
+    @ExceptionHandler({
+            AccessDeniedException.class
+    })
+    public ResponseEntity<ExceptionResponse> accessDeniedExceptionHandler(Throwable exception){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ExceptionResponse.builder()
+                        .message(exception.getMessage())
+                        .status(HttpStatus.FORBIDDEN)
+                        .localDateTime(LocalDateTime.now())
                         .build()
                 );
     }

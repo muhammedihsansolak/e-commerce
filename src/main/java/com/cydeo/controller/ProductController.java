@@ -8,6 +8,7 @@ import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public class ProductController {
 
     private final ProductService productService;
 
+
     @GetMapping
     public ResponseEntity<ResponseWrapper> fetchAllProducts(){
         return ResponseEntity
@@ -28,6 +30,7 @@ public class ProductController {
                         HttpStatus.OK) );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{productCode}")
     public ResponseEntity<ResponseWrapper> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("productCode")String productCode){
         return ResponseEntity
@@ -36,6 +39,7 @@ public class ProductController {
                         HttpStatus.CREATED ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseWrapper> createProduct(@RequestBody ProductDTO productDTO){
         return ResponseEntity
