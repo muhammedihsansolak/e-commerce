@@ -1,15 +1,16 @@
 package com.cydeo.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
-@Data
+@NoArgsConstructor
 public class Product extends BaseEntity{
 
     private BigDecimal price;

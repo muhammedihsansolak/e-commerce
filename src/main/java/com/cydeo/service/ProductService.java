@@ -16,4 +16,5 @@ public interface ProductService {
     List<ProductDTO> findProductByProductRequest(ProductRequest productRequest);
     List<ProductDTO> getProductsByPriceAndQuantity(BigDecimal price, Integer quantity);
     List<ProductDTO> getProductsByCategory(Long categoryId);
+    ProductDTO getProductByProductCode(String productCode);
 }

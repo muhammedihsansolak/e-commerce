@@ -97,4 +97,11 @@ public class ProductServiceImpl implements ProductService {
                 .stream().map(product -> mapper.convert(product, new ProductDTO()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public ProductDTO getProductByProductCode(String productCode) {
+        Product product = productRepository.findByProductCode(productCode)
+                .orElseThrow(() -> new ProductNotFoundException("Product couldn't found with product code: "+ productCode));
+        return mapper.convert(product, new ProductDTO());
+    }
 }

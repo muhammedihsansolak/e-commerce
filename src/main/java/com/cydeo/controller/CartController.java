@@ -19,11 +19,10 @@ public class CartController {
 
     @PostMapping("/add-to-cart")
     public ResponseEntity<ResponseWrapper> addToCart(
-            @RequestParam(name = "customerId") Long customerId,
-            @RequestParam(name = "productId") Long productId,
+            @RequestParam(name = "productCode") String productCode,
             @RequestParam(name = "quantity") Integer quantity)
     {
-        boolean result = cartService.addToCart(customerId, productId, quantity);
+        boolean result = cartService.addToCart(productCode, quantity);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

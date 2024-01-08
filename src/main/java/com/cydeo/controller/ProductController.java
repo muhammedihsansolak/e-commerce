@@ -103,4 +103,16 @@ public class ProductController {
                         HttpStatus.ACCEPTED ));
     }
 
+    @GetMapping("/product-code")
+    public ResponseEntity<ResponseWrapper> getProductByProductCode(@RequestParam("productCode") String productCode ){
+        ProductDTO product = productService.getProductByProductCode(productCode);
+        return ResponseEntity.ok(ResponseWrapper.builder()
+                .data(product)
+                .statusCode(HttpStatus.OK.value())
+                .success(true)
+                .message("Product with product code: "+ productCode + " has successfully retrieved!")
+                .build()
+        );
+    }
+
 }

@@ -1,12 +1,15 @@
 package com.cydeo.entity;
 
 import com.cydeo.enums.CartState;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
-@Data
+@NoArgsConstructor
 public class Cart extends BaseEntity{
     @ManyToOne
     private Customer customer;

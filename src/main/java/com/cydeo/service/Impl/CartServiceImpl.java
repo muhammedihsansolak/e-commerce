@@ -12,6 +12,7 @@ import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
 import com.cydeo.service.CartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -45,17 +46,18 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public boolean addToCart(Long customerId, Long productId, Integer quantity) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product couldn't find"));
+    public boolean addToCart( String productCode, Integer quantity) {
+        Product product = productRepository.findByProductCode(productCode)
+                .orElseThrow(() -> new RuntimeException("Product couldn't find with product code: "+ productCode));
 
         // quantity that customer would like to buy needs to be bigger than product's remaining quantity
         if (product.getRemainingQuantity() < quantity) {
             throw new NotEnoughStockException("Not enough stock");
         }
 
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't found with id: "+ customerId));
+        String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't found with email: "+ currentCustomerEmail));
 
         // we retrieve customer's cart, if there is no cart that belongs to the customer we create one
         // we are checking, is there any cart, duplication, size

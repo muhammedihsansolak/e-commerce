@@ -1,14 +1,15 @@
 package com.cydeo.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
-@Data
+@NoArgsConstructor
 public class Category extends BaseEntity {
     private String name;
 }

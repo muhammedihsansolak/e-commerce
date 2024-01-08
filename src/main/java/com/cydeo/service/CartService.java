@@ -13,7 +13,7 @@ public interface CartService {
 
     CartDTO findById(Long id);
 
-    boolean addToCart(Long customerId, Long productId, Integer quantity);
+    boolean addToCart(String productCode, Integer quantity);
 
     BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Long cartId);
 

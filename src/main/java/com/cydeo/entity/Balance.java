@@ -1,15 +1,18 @@
 package com.cydeo.entity;
 
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
-@Data
+@NoArgsConstructor
 public class Balance extends BaseEntity{
     @OneToOne
     private Customer customer;

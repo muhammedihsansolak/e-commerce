@@ -1,13 +1,14 @@
 package com.cydeo.entity;
 
 import com.cydeo.enums.Role;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
 @NoArgsConstructor
 public class Customer extends BaseEntity {
