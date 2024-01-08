@@ -1,4 +1,4 @@
-package com.cydeo.security.auth;
+package com.cydeo.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

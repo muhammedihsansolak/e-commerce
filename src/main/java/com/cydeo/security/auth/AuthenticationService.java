@@ -1,5 +1,8 @@
 package com.cydeo.security.auth;
 
+import com.cydeo.dto.request.AuthenticationRequest;
+import com.cydeo.dto.request.RegisterRequest;
+import com.cydeo.dto.response.AuthenticationResponse;
 import com.cydeo.entity.Customer;
 import com.cydeo.entity.principal.UserPrincipal;
 import com.cydeo.enums.Role;
