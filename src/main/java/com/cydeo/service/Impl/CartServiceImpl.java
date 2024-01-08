@@ -4,10 +4,7 @@ import com.cydeo.dto.CartDTO;
 import com.cydeo.entity.*;
 import com.cydeo.enums.CartState;
 import com.cydeo.enums.DiscountType;
-import com.cydeo.exception.CartNotFoundException;
-import com.cydeo.exception.CustomerNotFoundException;
-import com.cydeo.exception.DiscountNotFoundException;
-import com.cydeo.exception.NotEnoughStockException;
+import com.cydeo.exception.*;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
 import com.cydeo.service.CartService;
@@ -48,7 +45,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public boolean addToCart( String productCode, Integer quantity) {
         Product product = productRepository.findByProductCode(productCode)
-                .orElseThrow(() -> new RuntimeException("Product couldn't find with product code: "+ productCode));
+                .orElseThrow(() -> new ProductNotFoundException("Product couldn't find with product code: "+ productCode));
 
         // quantity that customer would like to buy needs to be bigger than product's remaining quantity
         if (product.getRemainingQuantity() < quantity) {
@@ -79,7 +76,6 @@ public class CartServiceImpl implements CartService {
             cartItem.setProduct(product);
             cartItemRepository.save(cartItem);
         }
-
         return true;
     }
 
