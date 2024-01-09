@@ -47,7 +47,7 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findByProductCode(productCode)
                 .orElseThrow(() -> new ProductNotFoundException("Product couldn't find with product code: "+ productCode));
 
-        // quantity that customer would like to buy needs to be bigger than product's remaining quantity
+        // quantity, that customer would like to buy, needs to be bigger than product's remaining quantity
         if (product.getRemainingQuantity() < quantity) {
             throw new NotEnoughStockException("Not enough stock");
         }
@@ -100,7 +100,7 @@ public class CartServiceImpl implements CartService {
         // without having any item in cart, if customer try to add discount to cart we need to throw exception
         List<CartItem> cartItemList = cartItemRepository.findAllByCart(cart);
         if (cartItemList == null || cartItemList.size() == 0) {
-            throw new RuntimeException("There is no item in the cart");
+            throw new RuntimeException("There is no item in the cart. Hence discount cannot be applied");
         }
 
         BigDecimal totalCartAmount = calculateTotalCartAmount(cartItemList);
@@ -113,12 +113,14 @@ public class CartServiceImpl implements CartService {
         cart.setDiscount(discount);
         cartRepository.save(cart);
 
-        // we are deciding which discount will be added to cart
+        // if discount is RATE_BASED
         if (discount.getDiscountType().equals(DiscountType.RATE_BASED)) {
             return totalCartAmount
                     .multiply(discount.getDiscount())
                     .divide(new BigDecimal(100), RoundingMode.FLOOR);
-        } else {
+        }
+        // if discount is AMOUNT_BASED
+        else {
             return discount.getDiscount();
         }
     }

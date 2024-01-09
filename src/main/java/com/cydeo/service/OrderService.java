@@ -22,5 +22,5 @@ public interface OrderService {
 
     OrderDTO findByIdAndCurrency(Long id, Optional<String> currency);
 
-    BigDecimal placeOrder(String paymentMethod, Long customerId);
+    BigDecimal placeOrder(String paymentMethod, String discountName);
 }

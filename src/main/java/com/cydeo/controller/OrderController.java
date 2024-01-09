@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
@@ -86,17 +87,19 @@ public class OrderController {
         );
     }
 
-    @PostMapping("/place-order/{paymentMethod}/{customerId}")
+    @PostMapping("/place-order")
     public ResponseEntity<ResponseWrapper> placeOrder(
-            @PathVariable("paymentMethod")String paymentMethod,
-            @PathVariable("customerId") Long customerId )
+            @RequestParam("paymentMethod")String paymentMethod,
+            @RequestParam("discountName")String discountName
+            )
     {
+        BigDecimal paidPrice = orderService.placeOrder(paymentMethod, discountName);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseWrapper.builder()
-                .message("Order placed successfully!")
+                .message("Order placed successfully! Paid price: "+paidPrice)
                 .statusCode(201)
                 .success(true)
-                .data(orderService.placeOrder(paymentMethod, customerId))
+                .data(paidPrice)
                 .build()
         );
     }

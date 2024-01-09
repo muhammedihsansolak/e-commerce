@@ -16,6 +16,7 @@ import com.cydeo.service.CartService;
 import com.cydeo.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -138,61 +139,72 @@ public class OrderServiceImpl implements OrderService {
 
     //accepting the order
     @Override
-    public BigDecimal placeOrder(String paymentMethod, Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with id: "+customerId));
+    public BigDecimal placeOrder(String paymentMethod, String discountName) {
+        String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with e-mail: "+currentCustomerEmail));
 
+        //retrieve customer cart, which has CREATED status, based on customer id
         List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
         if (cartList == null || cartList.size() == 0) {
             throw new RuntimeException("Cart couldn't find or cart is empty");
         }
 
-        //there always be 1 cart with created state
+        //there always be 1 cart with CREATED state
         Cart cart = cartList.get(0);
-        List<CartItem> cartItemList = cartItemRepository.findAllByCart(cart);
 
-        // if there is an item quantity that exceeds product remaining quantity, we have to remove it from cart item list
-        cartItemList.removeIf(cartItem -> cartItem.getQuantity() > cartItem.getProduct().getRemainingQuantity());
+        //retrieve all cart items belong to cart
+        List<CartItem> cartItemList = cartItemRepository.findAllByCart(cart);
 
         // if there is no item in the cart we are returning ZERO because this method should be return paid price
         if (cartItemList.size() == 0){
             return BigDecimal.ZERO;
         }
 
+        // if there is an item quantity that exceeds product remaining quantity, remove it from cart item list
+        cartItemList.removeIf(cartItem ->
+                cartItem.getQuantity() > cartItem.getProduct().getRemainingQuantity()
+        );
+
         // Before placing order discount must have been applied to cart.
-        BigDecimal lastDiscountAmount = BigDecimal.ZERO;
+        BigDecimal finalDiscountAmount = BigDecimal.ZERO;
 
         if (cart.getDiscount() != null) {
-            lastDiscountAmount = cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount(cart.getDiscount().getName(), cart.getId());
+            finalDiscountAmount = cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount(discountName, cart.getId());
         }
 
         BigDecimal totalCartAmount = cartService.calculateTotalCartAmount(cartItemList);
 
-        Payment payment = new Payment();
         Order order = new Order();
         order.setCart(cart);
         order.setCustomer(customer);
         order.setTotalPrice(totalCartAmount);
 
         // calculating cart total amount after discount
-        order.setPaidPrice(totalCartAmount.subtract(lastDiscountAmount));
+        order.setPaidPrice( totalCartAmount.subtract(finalDiscountAmount) );
 
         PaymentMethod foundPaymentMethod = Arrays.stream(PaymentMethod.values())
-                .filter(payments -> payments.getPaymentMethod().equals(paymentMethod))
-                .findFirst().orElseThrow();
+                .filter(payments -> payments.getPaymentMethod().equals(paymentMethod)).findFirst()
+                .orElseThrow(() -> new RuntimeException("Payment not found: " + paymentMethod +
+                        " Available payment methods are: "+
+                        Arrays.stream(PaymentMethod.values())
+                                .map(PaymentMethod::getPaymentMethod)
+                                .collect(Collectors.joining(","))
+                        ));
 
         // additional discount (10 $) for specific payment method for credit card
         if (foundPaymentMethod.equals(PaymentMethod.CREDIT_CARD)) {
             order.setPaidPrice(order.getPaidPrice().subtract(BigDecimal.TEN));
         }
 
+        Payment payment = new Payment();
         payment.setPaidPrice(order.getPaidPrice());
         payment.setPaymentMethod(foundPaymentMethod);
         payment = paymentRepository.save(payment);
 
         order.setPayment(payment);
 
-        // after successful order decrease product remaining quantity
+        // decrease product remaining quantity
         cartItemList.forEach(cartItem -> {
             cartItem.getProduct().setRemainingQuantity(
                     cartItem.getProduct().getRemainingQuantity() - cartItem.getQuantity());

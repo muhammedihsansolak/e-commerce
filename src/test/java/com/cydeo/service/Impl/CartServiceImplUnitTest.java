@@ -4,23 +4,17 @@ import com.cydeo.entity.Cart;
 import com.cydeo.entity.CartItem;
 import com.cydeo.entity.Customer;
 import com.cydeo.entity.Product;
-import com.cydeo.entity.principal.UserPrincipal;
 import com.cydeo.enums.CartState;
 import com.cydeo.exception.CustomerNotFoundException;
 import com.cydeo.exception.NotEnoughStockException;
 import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -54,7 +48,7 @@ class CartServiceImplUnitTest {
     private CartServiceImpl cartService;
 
     //******************************************
-    //              add to cart
+    //              addToCart()
     //******************************************
 
     @Test
