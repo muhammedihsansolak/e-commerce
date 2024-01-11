@@ -2,6 +2,7 @@ package com.cydeo.service;
 
 import com.cydeo.dto.ProductDTO;
 import com.cydeo.dto.request.ProductRequest;
+import com.cydeo.entity.Product;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,4 +18,5 @@ public interface ProductService {
     List<ProductDTO> getProductsByPriceAndQuantity(BigDecimal price, Integer quantity);
     List<ProductDTO> getProductsByCategory(Long categoryId);
     ProductDTO getProductByProductCode(String productCode);
+    void decreaseProductRemainingQuantity(Product product, Integer quantity);
 }

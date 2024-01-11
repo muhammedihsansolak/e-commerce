@@ -6,6 +6,7 @@ import com.cydeo.service.DiscountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
@@ -29,6 +30,7 @@ public class DiscountController {
                 ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{discountName}")
     public ResponseEntity<ResponseWrapper> updateDiscount(@RequestBody DiscountDTO discountDTO, @PathVariable("discountName")String discountName){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -38,6 +40,7 @@ public class DiscountController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseWrapper> createDiscount(@RequestBody DiscountDTO discountDTO){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -52,7 +55,7 @@ public class DiscountController {
         String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
         return ResponseEntity.ok(new ResponseWrapper(
                 "Discount found! : "+ name,
-                discountService.getDiscountByName(encodedName),
+                discountService.getDiscountByDiscountCode(encodedName),
                 HttpStatus.OK
         ));
     }

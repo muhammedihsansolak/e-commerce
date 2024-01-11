@@ -11,5 +11,5 @@ public interface DiscountService {
 
     DiscountDTO createDiscount(DiscountDTO discountDTO);
 
-    DiscountDTO getDiscountByName(String name);
+    DiscountDTO getDiscountByDiscountCode(String discountCode);
 }

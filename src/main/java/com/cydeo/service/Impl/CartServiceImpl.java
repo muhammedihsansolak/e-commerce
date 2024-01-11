@@ -83,10 +83,10 @@ public class CartServiceImpl implements CartService {
     @Override
     public BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Long cartId) {
         // we retrieve discount by name and if there is no discount with the name, we need to throw exception
-        Discount discount = discountRepository.findByName(discountName)
+        Discount discount = discountRepository.findByDiscountCode(discountName)
                 .orElseThrow(() -> new DiscountNotFoundException("Discount not found with discount name: "+discountName));
 
-        if (discount.getDiscount() == null || discount.getDiscount().compareTo(BigDecimal.ZERO) <= 0 ) {
+        if (discount.getDiscountAmount() == null || discount.getDiscountAmount().compareTo(BigDecimal.ZERO) <= 0 ) {
             throw new RuntimeException("Discount amount can not be null or smaller than 1");
         }
 
@@ -116,12 +116,12 @@ public class CartServiceImpl implements CartService {
         // if discount is RATE_BASED
         if (discount.getDiscountType().equals(DiscountType.RATE_BASED)) {
             return totalCartAmount
-                    .multiply(discount.getDiscount())
+                    .multiply(discount.getDiscountAmount())
                     .divide(new BigDecimal(100), RoundingMode.FLOOR);
         }
         // if discount is AMOUNT_BASED
         else {
-            return discount.getDiscount();
+            return discount.getDiscountAmount();
         }
     }
 

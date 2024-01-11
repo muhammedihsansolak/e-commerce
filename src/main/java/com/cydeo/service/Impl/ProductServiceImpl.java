@@ -104,4 +104,10 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Product couldn't found with product code: "+ productCode));
         return mapper.convert(product, new ProductDTO());
     }
+
+    @Override
+    public void decreaseProductRemainingQuantity(Product product, Integer quantity) {
+        product.setRemainingQuantity(product.getRemainingQuantity() - quantity);
+        productRepository.save(product);
+    }
 }

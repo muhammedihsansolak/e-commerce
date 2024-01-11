@@ -28,7 +28,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public DiscountDTO update(DiscountDTO discountDTO, String discountName) {
-        Discount foundDiscount = discountRepository.findByName(discountName)
+        Discount foundDiscount = discountRepository.findByDiscountCode(discountName)
                 .orElseThrow(() -> new DiscountNotFoundException("Discount not fount with name: " + discountName));
 
         Discount discount = mapper.convert(foundDiscount, new Discount());
@@ -47,9 +47,9 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public DiscountDTO getDiscountByName(String discountName) {
-        Discount discount = discountRepository.findByName(discountName)
-                .orElseThrow(() -> new DiscountNotFoundException("Discount not fount with name: " + discountName));
+    public DiscountDTO getDiscountByDiscountCode(String discountCode) {
+        Discount discount = discountRepository.findByDiscountCode(discountCode)
+                .orElseThrow(() -> new DiscountNotFoundException("Discount not fount with discount code: " + discountCode));
 
         return mapper.convert(discount, new DiscountDTO());
     }

@@ -13,10 +13,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class Discount extends BaseEntity{
 
-    @Column(unique = true)
-    private String name;
+    @Column(unique = true, updatable = false)
+    private String discountCode;
 
-    private BigDecimal discount;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private BigDecimal discountAmount;
 
     @Enumerated(value = EnumType.STRING)
     private DiscountType discountType;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ServiceLogging {
 
-    @Pointcut("execution(* com.cydeo.service.*.*(..))")
+    @Pointcut("execution(* com.cydeo.service.*.*(..)) && !execution(void com.cydeo.service.*.*(..))")
     public void service(){}
 
     @Before("service()")

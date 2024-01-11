@@ -90,10 +90,10 @@ public class OrderController {
     @PostMapping("/place-order")
     public ResponseEntity<ResponseWrapper> placeOrder(
             @RequestParam("paymentMethod")String paymentMethod,
-            @RequestParam("discountName")String discountName
+            @RequestParam("discountCode")String discountCode
             )
     {
-        BigDecimal paidPrice = orderService.placeOrder(paymentMethod, discountName);
+        BigDecimal paidPrice = orderService.placeOrder(paymentMethod, discountCode);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseWrapper.builder()
                 .message("Order placed successfully! Paid price: "+paidPrice)

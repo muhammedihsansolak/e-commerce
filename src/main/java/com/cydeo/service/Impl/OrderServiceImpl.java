@@ -14,6 +14,7 @@ import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
 import com.cydeo.service.CartService;
 import com.cydeo.service.OrderService;
+import com.cydeo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final CartService cartService;
     private final CurrencyClient currencyClient;
+    private final ProductService productService;
 
     @Value("${access_key}")
     private String accessKey;
@@ -139,7 +141,7 @@ public class OrderServiceImpl implements OrderService {
 
     //accepting the order
     @Override
-    public BigDecimal placeOrder(String paymentMethod, String discountName) {
+    public BigDecimal placeOrder(String paymentMethod, String discountCode) {
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with e-mail: "+currentCustomerEmail));
@@ -147,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
         //retrieve customer cart, which has CREATED status, based on customer id
         List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
         if (cartList == null || cartList.size() == 0) {
-            throw new RuntimeException("Cart couldn't find or cart is empty");
+            throw new RuntimeException("Cart couldn't find");
         }
 
         //there always be 1 cart with CREATED state
@@ -167,11 +169,7 @@ public class OrderServiceImpl implements OrderService {
         );
 
         // Before placing order discount must have been applied to cart.
-        BigDecimal finalDiscountAmount = BigDecimal.ZERO;
-
-        if (cart.getDiscount() != null) {
-            finalDiscountAmount = cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount(discountName, cart.getId());
-        }
+        BigDecimal discountAmount = cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount(discountCode, cart.getId());
 
         BigDecimal totalCartAmount = cartService.calculateTotalCartAmount(cartItemList);
 
@@ -181,8 +179,9 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalPrice(totalCartAmount);
 
         // calculating cart total amount after discount
-        order.setPaidPrice( totalCartAmount.subtract(finalDiscountAmount) );
+        order.setPaidPrice( totalCartAmount.subtract(discountAmount) );
 
+        //find payment method
         PaymentMethod foundPaymentMethod = Arrays.stream(PaymentMethod.values())
                 .filter(payments -> payments.getPaymentMethod().equals(paymentMethod)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Payment not found: " + paymentMethod +
@@ -205,11 +204,16 @@ public class OrderServiceImpl implements OrderService {
         order.setPayment(payment);
 
         // decrease product remaining quantity
-        cartItemList.forEach(cartItem -> {
-            cartItem.getProduct().setRemainingQuantity(
-                    cartItem.getProduct().getRemainingQuantity() - cartItem.getQuantity());
-            cartItemRepository.save(cartItem);
-        });
+//        cartItemList.forEach(cartItem -> {
+//            cartItem.getProduct().setRemainingQuantity(
+//                    cartItem.getProduct().getRemainingQuantity() - cartItem.getQuantity());
+//            cartItemRepository.save(cartItem);
+//        });
+        cartItemList.forEach(cartItem -> productService.decreaseProductRemainingQuantity(cartItem.getProduct(), cartItem.getQuantity()));
+
+        //change cart state to sold
+        cart.setCartState(CartState.SOLD);
+        cartRepository.save(cart);
 
         orderRepository.save(order);
         return order.getPaidPrice();

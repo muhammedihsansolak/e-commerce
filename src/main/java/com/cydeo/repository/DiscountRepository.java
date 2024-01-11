@@ -12,13 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
-    Optional<Discount> findByName(String name);
+    Optional<Discount> findByDiscountCode(String discountCode);
 
-    List<Discount> findAllByDiscountGreaterThan(BigDecimal amount);
+    List<Discount> findAllByDiscountAmountGreaterThan(BigDecimal amount);
 
     List<Discount> findAllByDiscountType(DiscountType discountType);
 
-    @Query("SELECT d FROM Discount d WHERE d.discount BETWEEN ?1 AND ?2")
+    @Query("SELECT d FROM Discount d WHERE d.discountAmount BETWEEN ?1 AND ?2")
     List<Discount> findAllByRangeBetweenAmount(BigDecimal startAmount, BigDecimal endAmount);
 
 
