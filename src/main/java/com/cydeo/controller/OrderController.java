@@ -21,6 +21,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ResponseWrapper> getAllOrders(){
         return ResponseEntity.ok(
@@ -32,6 +33,18 @@ public class OrderController {
         );
     }
 
+    @GetMapping
+    public ResponseEntity<ResponseWrapper> getAllCustomerOrders(){
+        return ResponseEntity.ok(
+                new ResponseWrapper(
+                        "Orders are successfully retrieved",
+                        orderService.getAllCustomerOrders(),
+                        HttpStatus.ACCEPTED
+                )
+        );
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{orderId}")
     public ResponseEntity<ResponseWrapper> updateOrder(@PathVariable("orderId")Long orderId,@Valid @RequestBody OrderDTO orderDTO){
         return ResponseEntity
@@ -40,6 +53,7 @@ public class OrderController {
                         HttpStatus.CREATED ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseWrapper> createOrder(@Valid @RequestBody OrderDTO orderDTO){
         return ResponseEntity.ok(
@@ -51,6 +65,7 @@ public class OrderController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/paymentMethod/{paymentMethod}")
     public ResponseEntity<ResponseWrapper> getOrdersByPaymentMethod(@PathVariable("paymentMethod")PaymentMethod paymentMethod){
         return ResponseEntity.ok(
@@ -62,6 +77,7 @@ public class OrderController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/email/{email}")
     public ResponseEntity<ResponseWrapper> getOrdersByEmail(@PathVariable("email")String email){
         return ResponseEntity.ok(
@@ -73,6 +89,7 @@ public class OrderController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper> findById(
             @PathVariable("id")Long id,

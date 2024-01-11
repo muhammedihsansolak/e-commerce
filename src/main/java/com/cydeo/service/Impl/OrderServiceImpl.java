@@ -219,6 +219,16 @@ public class OrderServiceImpl implements OrderService {
         return order.getPaidPrice();
     }
 
+    @Override
+    public List<OrderDTO> getAllCustomerOrders() {
+        String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Order> allByCustomerEmail = orderRepository.findAllByCustomer_Email(currentCustomerEmail);
+
+        return allByCustomerEmail.stream()
+                .map(order -> mapperUtil.convert(order, new OrderDTO()))
+                .collect(Collectors.toList());
+    }
+
 }
 
 

@@ -6,6 +6,7 @@ import com.cydeo.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +16,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ResponseWrapper> getCustomers(){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -25,6 +27,7 @@ public class CustomerController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{email}")
     public ResponseEntity<ResponseWrapper> updateCustomer(@RequestBody CustomerDTO customerDTO, @PathVariable("email") String email){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -34,6 +37,7 @@ public class CustomerController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseWrapper> createCustomer(@RequestBody CustomerDTO customerDTO){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -43,6 +47,7 @@ public class CustomerController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("{email}")
     public ResponseEntity<ResponseWrapper> getCustomerByEmail(@PathVariable("email")String email){
         return ResponseEntity.ok(new ResponseWrapper(

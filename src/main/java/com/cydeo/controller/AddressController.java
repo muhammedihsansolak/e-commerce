@@ -6,6 +6,7 @@ import com.cydeo.service.AddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +16,7 @@ public class AddressController {
 
     private final AddressService addressService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ResponseWrapper> getAllAddresses(){
         return ResponseEntity
@@ -26,6 +28,7 @@ public class AddressController {
                 ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{addressId}")
     public ResponseEntity<ResponseWrapper> updateAddress(@RequestBody AddressDTO addressDTO, @PathVariable("addressId") Long addressId ){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -35,6 +38,7 @@ public class AddressController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseWrapper> createAddress(@RequestBody AddressDTO addressDTO){
         return ResponseEntity.ok(new ResponseWrapper(
@@ -44,6 +48,7 @@ public class AddressController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/startsWith/{char}")
     public ResponseEntity<ResponseWrapper> findAddressesStartsWith(@PathVariable("char")String ch ){
         return ResponseEntity
@@ -55,6 +60,7 @@ public class AddressController {
                 ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<ResponseWrapper> findAddressByCustomerId(@PathVariable("customerId") Long id ){
         return ResponseEntity
@@ -65,6 +71,7 @@ public class AddressController {
                 ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/customer/{customerId}/name/{name}")
     public ResponseEntity<ResponseWrapper> findAddressByCustomerIdAndName(@PathVariable("customerId") Long id,@PathVariable("name") String name){
         return ResponseEntity

@@ -35,6 +35,4 @@ public class CartController {
                 );
     }
 
-    //TODO display available discounts
-    //TODO select one discount and add to cart
 }
