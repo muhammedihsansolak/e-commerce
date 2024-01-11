@@ -1,23 +1,25 @@
 package com.cydeo.service.Impl;
 
-import com.cydeo.entity.Cart;
-import com.cydeo.entity.CartItem;
-import com.cydeo.entity.Customer;
-import com.cydeo.entity.Product;
+import com.cydeo.entity.*;
 import com.cydeo.enums.CartState;
+import com.cydeo.enums.DiscountType;
 import com.cydeo.exception.CustomerNotFoundException;
+import com.cydeo.exception.DiscountNotFoundException;
 import com.cydeo.exception.NotEnoughStockException;
 import com.cydeo.exception.ProductNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -198,5 +200,233 @@ class CartServiceImplUnitTest {
         Throwable throwable = catchThrowable(() -> cartService.addToCart("productCode", product.getRemainingQuantity() - 1));
         assertEquals( "Duplicate cart count. Check values on database" , throwable.getMessage());
     }
+
+    //**************************************************************************************************
+    //              applyDiscountToCartIfApplicableAndCalculateDiscountAmount()
+    //**************************************************************************************************
+
+    @Test
+    void should_throw_exception_when_discount_cannot_found_with_discount_name(){
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+
+        assertEquals("Discount not found with discount name: "+"discountName", throwable.getMessage());
+        assertThat(throwable).isInstanceOf(DiscountNotFoundException.class);
+    }
+
+    @Test
+    void should_throw_exception_when_discount_amount_is_null(){
+        Discount discount = new Discount();
+        discount.setDiscount(null);
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("Discount amount can not be null or smaller than 1", throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_discount_amount_is_smaller_than_one(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.ZERO);
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("Discount amount can not be null or smaller than 1", throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_discount_minimum_amount_is_null(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(null);
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("Discount minimum amount can not be null or smaller than 1", throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_discount_minimum_amount_is_smaller_than_one(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.ZERO);
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("Discount minimum amount can not be null or smaller than 1", throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_cart_cannot_found_with_id(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.TEN);
+
+        Long cartId = 1L;
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(cartId)).thenReturn(Optional.empty());
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("Cart not found with id : " + cartId , throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_cart_item_list_is_null(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.TEN);
+
+        Cart cart = new Cart();
+
+        List<CartItem> cartItemList = new ArrayList<>();
+        cartItemList = null;
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(anyLong())).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("There is no item in the cart. Hence discount cannot be applied", throwable.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_cart_item_list_has_no_item(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.TEN);
+
+        Cart cart = new Cart();
+
+        List<CartItem> cartItemList = new ArrayList<>();
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(anyLong())).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
+
+        Throwable throwable = catchThrowable(() -> cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L));
+        assertEquals("There is no item in the cart. Hence discount cannot be applied", throwable.getMessage());
+    }
+
+    @Test
+    void should_return_zero_if_cart_total_amount_less_than_discount_minimum_amount(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.valueOf(500));
+
+        Cart cart = new Cart();
+
+        Product product1 = new Product();
+        product1.setPrice(BigDecimal.valueOf(30));
+
+        Product product2 = new Product();
+        product2.setPrice(BigDecimal.valueOf(15));
+
+        CartItem cartItem1 = new CartItem();
+        cartItem1.setCart(cart);
+        cartItem1.setQuantity(5);
+        cartItem1.setProduct(product1);
+
+        CartItem cartItem2 = new CartItem();
+        cartItem2.setCart(cart);
+        cartItem2.setQuantity(10);
+        cartItem2.setProduct(product2);
+
+        List<CartItem> cartItemList = new ArrayList<>();
+        cartItemList.add(cartItem1);
+        cartItemList.add(cartItem2);
+
+        //cartTotalAmount -> $ 300 but discount min amount -> $ 500
+
+        when(discountRepository.findByName(anyString())).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(anyLong())).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
+
+        assertThat(cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L)).isEqualTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void should_apply_amount_based_discount_to_cart_and_save_database(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.valueOf(150));
+        discount.setDiscountType(DiscountType.AMOUNT_BASED);
+
+        Cart cart = new Cart();
+
+        Product product1 = new Product();
+        product1.setPrice(BigDecimal.valueOf(30));
+
+        Product product2 = new Product();
+        product2.setPrice(BigDecimal.valueOf(15));
+
+        CartItem cartItem1 = new CartItem();
+        cartItem1.setCart(cart);
+        cartItem1.setQuantity(5);
+        cartItem1.setProduct(product1);
+
+        CartItem cartItem2 = new CartItem();
+        cartItem2.setCart(cart);
+        cartItem2.setQuantity(10);
+        cartItem2.setProduct(product2);
+
+        List<CartItem> cartItemList = new ArrayList<>();
+        cartItemList.add(cartItem1);
+        cartItemList.add(cartItem2);
+
+        //cartTotalAmount -> $ 300 discount min amount -> $ 150. discount amount should be applied
+
+        when(discountRepository.findByName("discountName")).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
+
+        assertThat(cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L)).isEqualTo(BigDecimal.TEN);
+    }
+
+    @Test
+    void should_apply_rate_based_discount_to_cart_and_save_database(){
+        Discount discount = new Discount();
+        discount.setDiscount(BigDecimal.TEN);
+        discount.setMinimumAmount(BigDecimal.valueOf(150));
+        discount.setDiscountType(DiscountType.RATE_BASED);
+
+        Cart cart = new Cart();
+
+        Product product1 = new Product();
+        product1.setPrice(BigDecimal.valueOf(30));
+
+        Product product2 = new Product();
+        product2.setPrice(BigDecimal.valueOf(15));
+
+        CartItem cartItem1 = new CartItem();
+        cartItem1.setCart(cart);
+        cartItem1.setQuantity(5);
+        cartItem1.setProduct(product1);
+
+        CartItem cartItem2 = new CartItem();
+        cartItem2.setCart(cart);
+        cartItem2.setQuantity(10);
+        cartItem2.setProduct(product2);
+
+        List<CartItem> cartItemList = new ArrayList<>();
+        cartItemList.add(cartItem1);
+        cartItemList.add(cartItem2);
+
+        //cartTotalAmount -> $ 300 discount min amount -> $ 150. discount amount should be applied
+
+        when(discountRepository.findByName("discountName")).thenReturn(Optional.of(discount));
+        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
+
+        assertThat(cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("discountName", 1L)).isEqualTo(BigDecimal.valueOf(30));
+    }
+
+
 
 }
