@@ -33,7 +33,7 @@ public class OrderController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/customer-orders")
     public ResponseEntity<ResponseWrapper> getAllCustomerOrders(){
         return ResponseEntity.ok(
                 new ResponseWrapper(

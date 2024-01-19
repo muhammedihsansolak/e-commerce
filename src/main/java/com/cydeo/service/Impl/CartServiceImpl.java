@@ -81,10 +81,10 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
-    public BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountName, Long cartId) {
-        // we retrieve discount by name and if there is no discount with the name, we need to throw exception
-        Discount discount = discountRepository.findByDiscountCode(discountName)
-                .orElseThrow(() -> new DiscountNotFoundException("Discount not found with discount name: "+discountName));
+    public BigDecimal applyDiscountToCartIfApplicableAndCalculateDiscountAmount(String discountCode, Long cartId) {
+        // we retrieve discount by code and if there is no discount with the name, we need to throw exception
+        Discount discount = discountRepository.findByDiscountCode(discountCode)
+                .orElseThrow(() -> new DiscountNotFoundException("Discount not found with discount name: "+discountCode));
 
         if (discount.getDiscountAmount() == null || discount.getDiscountAmount().compareTo(BigDecimal.ZERO) <= 0 ) {
             throw new RuntimeException("Discount amount can not be null or smaller than 1");
@@ -155,5 +155,17 @@ public class CartServiceImpl implements CartService {
         }
 
         return cartList.get(0);
+    }
+
+    @Override
+    public CartDTO getCustomersCart() {
+        String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Cart> cartList = cartRepository.findByCustomer_EmailAndCartState(currentCustomerEmail, CartState.CREATED);
+
+        if (cartList == null || cartList.size() == 0) throw new CartNotFoundException("Cart cannot found for customer: "+currentCustomerEmail);
+
+        //every customer has one cart
+        Cart cart = cartList.get(0);
+        return mapper.convert(cart, new CartDTO());
     }
 }

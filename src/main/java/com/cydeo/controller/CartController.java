@@ -1,14 +1,12 @@
 package com.cydeo.controller;
 
+import com.cydeo.dto.CartDTO;
 import com.cydeo.dto.response.ResponseWrapper;
 import com.cydeo.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -30,6 +28,20 @@ public class CartController {
                         .success(true)
                         .message("Product successfully added to cart!")
                         .data(result)
+                        .statusCode(201)
+                        .build()
+                );
+    }
+//TODO display items in the customers cart
+    @GetMapping("/display-cart")
+    public ResponseEntity<ResponseWrapper> displayCustomersCart(){
+        CartDTO customersCart = cartService.getCustomersCart();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ResponseWrapper.builder()
+                        .success(true)
+                        .message("Cart successfully retrieved!")
+                        .data(customersCart)
                         .statusCode(201)
                         .build()
                 );

@@ -13,11 +13,14 @@ import java.math.BigDecimal;
 public class DiscountDTO{
 
     @NotNull
-    private String name;
+    private String discountCode;
+
+    @NotNull
+    private String description;
 
     @Positive(message = "Discount amount should be positive")
     @NotNull
-    private BigDecimal discount;
+    private BigDecimal discountAmount;
 
     @NotNull
     private DiscountType discountType;

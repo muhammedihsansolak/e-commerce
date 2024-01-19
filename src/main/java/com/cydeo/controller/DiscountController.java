@@ -44,7 +44,7 @@ public class DiscountController {
     @PostMapping
     public ResponseEntity<ResponseWrapper> createDiscount(@RequestBody DiscountDTO discountDTO){
         return ResponseEntity.ok(new ResponseWrapper(
-                "Discount "+ discountDTO.getName() +" created!",
+                "Discount "+ discountDTO.getDiscountCode() +" created!",
                 discountService.createDiscount(discountDTO),
                 HttpStatus.CREATED
         ));
