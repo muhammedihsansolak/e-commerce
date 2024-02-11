@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "payments")
 public class Payment extends BaseEntity{
     private BigDecimal paidPrice;
 

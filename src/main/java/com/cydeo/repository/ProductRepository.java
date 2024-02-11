@@ -23,8 +23,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Integer countProductByPriceGreaterThan(BigDecimal price);
 
-    List<Product> findAllByQuantityIsGreaterThanEqual(int quantity);
-
     @Query(value = "select * from product p where p.price > ?1 and p.remaining_quantity < ?2", nativeQuery = true)
     List<Product> retrieveProductListGreaterThanPriceAndLowerThanRemainingQuantity(BigDecimal price, int remainingQuantity);
 

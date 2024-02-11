@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "discounts")
 public class Discount extends BaseEntity{
 
     @Column(unique = true, updatable = false)

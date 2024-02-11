@@ -8,10 +8,12 @@ import com.cydeo.enums.Currency;
 import com.cydeo.enums.PaymentMethod;
 import com.cydeo.exception.CurrencyInvalidException;
 import com.cydeo.exception.CustomerNotFoundException;
+import com.cydeo.exception.NoEnoughBalanceException;
 import com.cydeo.exception.OrderNotFoundException;
 import com.cydeo.client.CurrencyClient;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.*;
+import com.cydeo.service.BalanceService;
 import com.cydeo.service.CartService;
 import com.cydeo.service.OrderService;
 import com.cydeo.service.ProductService;
@@ -40,6 +42,8 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final CurrencyClient currencyClient;
     private final ProductService productService;
+    private final BalanceRepository balanceRepository;
+    private final BalanceService balanceService;
 
     @Value("${access_key}")
     private String accessKey;
@@ -54,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO updateOrder(Long orderId, OrderDTO orderDTO) {
         Order foundOrder = orderRepository.findById(orderId)
-                .orElseThrow( () -> new OrderNotFoundException("Order not found with id: "+orderId) );
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
 
         Order order = mapperUtil.convert(orderDTO, new Order());
         order.setId(foundOrder.getId());
@@ -90,10 +94,10 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO findById(Long id, String currency) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
-        if (currency != null){
+        if (currency != null) {
             BigDecimal rate = currencyClient.getCurrency(accessKey, currency).getBody().getQuotes().get("USD" + currency);
-            order.setTotalPrice( order.getTotalPrice().multiply(rate) );
-            order.setPaidPrice( order.getPaidPrice().multiply(rate) );
+            order.setTotalPrice(order.getTotalPrice().multiply(rate));
+            order.setPaidPrice(order.getPaidPrice().multiply(rate));
 
         }
         return mapperUtil.convert(order, new OrderDTO());
@@ -108,8 +112,8 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal currencyRate = getCurrencyRate(currency);
 
-        orderToReturn.setPaidPrice( convertCurrency(order.getPaidPrice(), currencyRate) );
-        orderToReturn.setTotalPrice( convertCurrency(order.getTotalPrice(), currencyRate) );
+        orderToReturn.setPaidPrice(convertCurrency(order.getPaidPrice(), currencyRate));
+        orderToReturn.setTotalPrice(convertCurrency(order.getTotalPrice(), currencyRate));
 
         return orderToReturn;
     }
@@ -120,13 +124,13 @@ public class OrderServiceImpl implements OrderService {
 
     private BigDecimal getCurrencyRate(Optional<String> currency) throws CurrencyInvalidException {
 
-        if (currency.isPresent() && ! currency.get().equalsIgnoreCase("USD")){
+        if (currency.isPresent() && !currency.get().equalsIgnoreCase("USD")) {
             validateCurrency(currency.get());
             CurrencyLayerResponse response = currencyClient
                     .getCurrency(accessKey, currency.get()).getBody();
             BigDecimal rate = response.getQuotes().get("USD" + currency.get().toUpperCase());
             return rate;
-        }else return BigDecimal.ONE;
+        } else return BigDecimal.ONE;
     }
 
     private void validateCurrency(String currency) throws CurrencyInvalidException {
@@ -134,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(eachCurrency -> eachCurrency.value)
                 .anyMatch(each -> each.equals(currency));
 
-        if (! anyMatch){
+        if (!anyMatch) {
             throw new CurrencyInvalidException("Invalid currency!");
         }
     }
@@ -144,7 +148,7 @@ public class OrderServiceImpl implements OrderService {
     public BigDecimal placeOrder(String paymentMethod, String discountCode) {
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with e-mail: "+currentCustomerEmail));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with e-mail: " + currentCustomerEmail));
 
         //retrieve customer cart, which has CREATED status, based on customer id
         List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
@@ -159,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
         List<CartItem> cartItemList = cartItemRepository.findAllByCart(cart);
 
         // if there is no item in the cart we are returning ZERO because this method should be return paid price
-        if (cartItemList.size() == 0){
+        if (cartItemList.size() == 0) {
             return BigDecimal.ZERO;
         }
 
@@ -179,22 +183,39 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalPrice(totalCartAmount);
 
         // calculating cart total amount after discount
-        order.setPaidPrice( totalCartAmount.subtract(discountAmount) );
+        BigDecimal paidPrice = totalCartAmount.subtract(discountAmount);
+        paidPrice = paidPrice.setScale(2, RoundingMode.HALF_UP); //rounding
+        order.setPaidPrice(paidPrice);
 
         //find payment method
         PaymentMethod foundPaymentMethod = Arrays.stream(PaymentMethod.values())
                 .filter(payments -> payments.getPaymentMethod().equals(paymentMethod)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Payment not found: " + paymentMethod +
-                        " Available payment methods are: "+
+                        ". Available payment methods are: " +
                         Arrays.stream(PaymentMethod.values())
                                 .map(PaymentMethod::getPaymentMethod)
                                 .collect(Collectors.joining(","))
-                        ));
+                ));
 
-        // additional discount (10 $) for specific payment method for credit card
+        // additional discount (10 $) for specific payment method for "credit card" payment method
         if (foundPaymentMethod.equals(PaymentMethod.CREDIT_CARD)) {
             order.setPaidPrice(order.getPaidPrice().subtract(BigDecimal.TEN));
         }
+
+        // additional discount (20 $) for specific payment method for "balance" payment method
+        if (foundPaymentMethod.equals(PaymentMethod.BALANCE)) {
+            order.setPaidPrice(order.getPaidPrice().subtract(BigDecimal.valueOf(20)));
+
+            //if there is no enough balance app throws exception
+            BigDecimal balance = balanceRepository.findByCustomer(customer)
+                    .orElseThrow(() -> new RuntimeException("Customer " + customer.getEmail() + " has no balance in the system!"))
+                    .getAmount();
+
+            if (balance.compareTo(order.getPaidPrice()) < 0) {
+                throw new NoEnoughBalanceException("Customer balance (" + balance + ") is not enough for pay " + order.getPaidPrice() + " !");
+            }
+        }
+
 
         Payment payment = new Payment();
         payment.setPaidPrice(order.getPaidPrice());
@@ -202,6 +223,11 @@ public class OrderServiceImpl implements OrderService {
         payment = paymentRepository.save(payment);
 
         order.setPayment(payment);
+
+        //if payment method is "balance", decrease customers balance
+        if (foundPaymentMethod.equals(PaymentMethod.BALANCE)) {
+            balanceService.decreaseCustomerBalance(customer.getId(), order.getPaidPrice());
+        }
 
         // decrease product remaining quantity
 //        cartItemList.forEach(cartItem -> {

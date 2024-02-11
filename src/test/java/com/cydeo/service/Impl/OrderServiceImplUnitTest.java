@@ -73,7 +73,6 @@ class OrderServiceImplUnitTest {
 
         Product product = new Product();
         product.setRemainingQuantity(50);
-        product.setQuantity(50);
         product.setPrice(BigDecimal.valueOf(25));
 
         CartItem cartItem = new CartItem();

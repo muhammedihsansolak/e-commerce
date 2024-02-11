@@ -11,6 +11,7 @@ import javax.persistence.Table;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "cart_items")
 public class CartItem extends BaseEntity {
     @ManyToOne
     private Product product;

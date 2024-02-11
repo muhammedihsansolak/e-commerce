@@ -10,6 +10,7 @@ import javax.persistence.*;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "carts")
 public class Cart extends BaseEntity{
     @ManyToOne
     private Customer customer;

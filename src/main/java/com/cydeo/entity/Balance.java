@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "balances")
 public class Balance extends BaseEntity{
     @OneToOne
     private Customer customer;

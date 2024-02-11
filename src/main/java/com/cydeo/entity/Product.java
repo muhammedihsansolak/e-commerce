@@ -11,10 +11,10 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "products")
 public class Product extends BaseEntity{
 
     private BigDecimal price;
-    private Integer quantity;
     private Integer remainingQuantity;
     private String name;
 

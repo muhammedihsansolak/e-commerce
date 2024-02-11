@@ -10,13 +10,14 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BalanceRepository extends JpaRepository<Balance, Long> {
     boolean existsBalanceByCustomer(Customer customer);
     boolean existsByCustomerId(Long id);
 
-    Balance findByCustomer(Customer customer);
+    Optional<Balance> findByCustomer(Customer customer);
     Balance findByCustomer_Id(Long id);
 
     @Query(value = "SELECT * FROM balance ORDER BY amount DESC LIMIT 5", nativeQuery = true)

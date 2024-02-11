@@ -10,6 +10,7 @@ import javax.persistence.Table;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "categories")
 public class Category extends BaseEntity {
     private String name;
 }

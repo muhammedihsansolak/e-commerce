@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 public class Order extends BaseEntity{
     @OneToOne
     private Cart cart;
-    private BigDecimal paidPrice;
-    private BigDecimal totalPrice;
+    private BigDecimal paidPrice; //with discount
+    private BigDecimal totalPrice; //without discount
     @ManyToOne
     private Customer customer;
     @OneToOne

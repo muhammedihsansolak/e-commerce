@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         exception.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ExceptionResponse.builder()
-                        .message("An error occurred!")
+                        .message("An error occurred! "+ exception.getMessage() )
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .localDateTime(LocalDateTime.now())
                         .build()

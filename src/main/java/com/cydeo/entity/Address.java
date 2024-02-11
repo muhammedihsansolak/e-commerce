@@ -11,6 +11,7 @@ import javax.persistence.Table;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
+@Table(name = "addresses")
 public class Address extends BaseEntity{
     private String name;
     private String zipCode;
