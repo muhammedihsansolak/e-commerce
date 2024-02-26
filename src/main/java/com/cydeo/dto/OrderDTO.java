@@ -1,7 +1,7 @@
 package com.cydeo.dto;
 
 import com.cydeo.entity.Cart;
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import com.cydeo.entity.Payment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,7 +28,7 @@ public class OrderDTO {
     private BigDecimal totalPrice;
 
     @NotNull(message = "Customer is required")
-    private Customer customer;
+    private User user;
 
     @NotNull(message = "Payment is required")
     private Payment paymentId;

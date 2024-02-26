@@ -2,12 +2,12 @@ package com.cydeo.service.Impl;
 
 import com.cydeo.dto.AddressDTO;
 import com.cydeo.entity.Address;
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import com.cydeo.exception.AddressNotFoundException;
 import com.cydeo.exception.CustomerNotFoundException;
 import com.cydeo.mapper.Mapper;
 import com.cydeo.repository.AddressRepository;
-import com.cydeo.repository.CustomerRepository;
+import com.cydeo.repository.UserRepository;
 import com.cydeo.service.AddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final Mapper mapperUtil;
 
     @Override
@@ -68,7 +68,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDTO> findAddressByCustomerId(Long customerId) {
-        List<Address> addresses = addressRepository.retrieveByCustomerId(customerId);
+        List<Address> addresses = addressRepository.retrieveByUserId(customerId);
         return addresses.stream()
                 .map(address -> mapperUtil.convert(address, new AddressDTO()))
                 .collect(Collectors.toList());
@@ -76,10 +76,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDTO> findAddressByCustomerIdAndName(Long customerId, String name) {
-        Customer customer = customerRepository.findById(customerId)
+        User user = userRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: "+customerId));
 
-        List<Address> list = addressRepository.findAllByCustomerAndName(customer, name);
+        List<Address> list = addressRepository.findAllByUserAndName(user, name);
 
         return list.stream()
                 .map(address -> mapperUtil.convert(address, new AddressDTO()))

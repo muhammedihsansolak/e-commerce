@@ -1,6 +1,5 @@
 package com.cydeo.dto;
 
-import com.cydeo.entity.Address;
 import com.cydeo.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +11,7 @@ import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @Data
-public class CustomerDTO {
+public class UserDTO {
 
     @JsonIgnore
     private Long id;

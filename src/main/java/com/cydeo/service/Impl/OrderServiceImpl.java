@@ -37,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final Mapper mapperUtil;
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final CartService cartService;
     private final CurrencyClient currencyClient;
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDTO> getOrdersByEmail(String email) {
-        return orderRepository.findAllByCustomer_Email(email)
+        return orderRepository.findAllByUser_Email(email)
                 .stream().map(order -> mapperUtil.convert(order, new OrderDTO()))
                 .collect(Collectors.toList());
     }
@@ -147,11 +147,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public BigDecimal placeOrder(String paymentMethod, String discountCode) {
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
+        User user = userRepository.retrieveByCustomerEmail(currentCustomerEmail)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't find with e-mail: " + currentCustomerEmail));
 
         //retrieve customer cart, which has CREATED status, based on customer id
-        List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
+        List<Cart> cartList = cartRepository.findAllByUserIdAndCartState(user.getId(), CartState.CREATED);
         if (cartList == null || cartList.size() == 0) {
             throw new RuntimeException("Cart couldn't find");
         }
@@ -179,7 +179,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = new Order();
         order.setCart(cart);
-        order.setCustomer(customer);
+        order.setUser(user);
         order.setTotalPrice(totalCartAmount);
 
         // calculating cart total amount after discount
@@ -207,8 +207,8 @@ public class OrderServiceImpl implements OrderService {
             order.setPaidPrice(order.getPaidPrice().subtract(BigDecimal.valueOf(20)));
 
             //if there is no enough balance app throws exception
-            BigDecimal balance = balanceRepository.findByCustomer(customer)
-                    .orElseThrow(() -> new RuntimeException("Customer " + customer.getEmail() + " has no balance in the system!"))
+            BigDecimal balance = balanceRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Customer " + user.getEmail() + " has no balance in the system!"))
                     .getAmount();
 
             if (balance.compareTo(order.getPaidPrice()) < 0) {
@@ -226,7 +226,7 @@ public class OrderServiceImpl implements OrderService {
 
         //if payment method is "balance", decrease customers balance
         if (foundPaymentMethod.equals(PaymentMethod.BALANCE)) {
-            balanceService.decreaseCustomerBalance(customer.getId(), order.getPaidPrice());
+            balanceService.decreaseCustomerBalance(user.getId(), order.getPaidPrice());
         }
 
         // decrease product remaining quantity
@@ -248,7 +248,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDTO> getAllCustomerOrders() {
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Order> allByCustomerEmail = orderRepository.findAllByCustomer_Email(currentCustomerEmail);
+        List<Order> allByCustomerEmail = orderRepository.findAllByUser_Email(currentCustomerEmail);
 
         return allByCustomerEmail.stream()
                 .map(order -> mapperUtil.convert(order, new OrderDTO()))

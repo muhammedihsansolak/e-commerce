@@ -9,7 +9,7 @@ public class CartDTO {
 
     @JsonIgnore
     private Long id;
-    private CustomerDTO customer;
+    private UserDTO customer;
     private DiscountDTO discount;
     private CartState cartState;
 }

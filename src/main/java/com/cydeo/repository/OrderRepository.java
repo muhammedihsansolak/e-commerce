@@ -16,11 +16,11 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
 
     List<Order> findTop5ByOrderByTotalPriceDesc();
 
-    List<Order> findAllByCustomer_Email(String email);
+    List<Order> findAllByUser_Email(String email);
 
     List<Order> findAllByPayment_PaymentMethod(PaymentMethod paymentMethod);
 
-    boolean existsByCustomer_email(String email);
+    boolean existsByUser_email(String email);
 
     @Query(value = "SELECT * FROM orders o JOIN cart c ON o.cart_id = c.id " +
                     "JOIN cart_item ci ON ci.cart_id = c.id " +

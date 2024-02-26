@@ -3,28 +3,29 @@ package com.cydeo.security.auth;
 import com.cydeo.dto.request.AuthenticationRequest;
 import com.cydeo.dto.request.RegisterRequest;
 import com.cydeo.dto.response.AuthenticationResponse;
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import com.cydeo.entity.principal.UserPrincipal;
 import com.cydeo.enums.Role;
 import com.cydeo.exception.CustomerNotFoundException;
-import com.cydeo.repository.CustomerRepository;
+import com.cydeo.repository.UserRepository;
 import com.cydeo.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final CustomerRepository repository;
+    private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var customer = new Customer();
+        var customer = new User();
         customer.setFirstName(request.getFirstName());
         customer.setLastName(request.getLastName());
         customer.setEmail(request.getEmail());

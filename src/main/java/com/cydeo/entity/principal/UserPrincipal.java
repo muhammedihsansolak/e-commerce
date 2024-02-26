@@ -1,6 +1,6 @@
 package com.cydeo.entity.principal;
 
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,25 +14,25 @@ import java.util.List;
 @Builder
 public class UserPrincipal implements UserDetails {
 
-    private Customer customer;
+    private User user;
 
-    public UserPrincipal(Customer customer) {
-        this.customer = customer;
+    public UserPrincipal(User user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(customer.getRole().name()));
+        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return customer.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return customer.getEmail();
+        return user.getEmail();
     }
 
     @Override

@@ -27,7 +27,7 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -53,13 +53,13 @@ public class CartServiceImpl implements CartService {
         }
 
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Customer customer = customerRepository.retrieveByCustomerEmail(currentCustomerEmail)
+        User user = userRepository.retrieveByCustomerEmail(currentCustomerEmail)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer couldn't found with email: "+ currentCustomerEmail));
 
         // we retrieve customer's cart, if there is no cart that belongs to the customer we create one
         // we are checking, is there any cart, duplication, size
-        List<Cart> cartList = cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED);
-        Cart cart = checkCartCount(cartList, customer);
+        List<Cart> cartList = cartRepository.findAllByUserIdAndCartState(user.getId(), CartState.CREATED);
+        Cart cart = checkCartCount(cartList, user);
 
         // we retrieve cart item related with the product to decide product is already there or will be added new
         CartItem cartItem = cartItemRepository.findAllByCartAndProduct(cart, product);
@@ -135,17 +135,17 @@ public class CartServiceImpl implements CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Cart createCartForCustomer(Customer customer) {
+    public Cart createCartForCustomer(User user) {
         Cart cart = new Cart();
         cart.setCartState(CartState.CREATED);
-        cart.setCustomer(customer);
+        cart.setUser(user);
         return cartRepository.save(cart);
     }
 
-    private Cart checkCartCount(List<Cart> cartList, Customer customer) {
+    private Cart checkCartCount(List<Cart> cartList, User user) {
         if (cartList == null || cartList.size() == 0) {
             cartList = new ArrayList<>();
-            Cart cart = createCartForCustomer(customer);
+            Cart cart = createCartForCustomer(user);
             cartList.add(cart);
         }
         // if customer has multiple cart as CREATED status, means that there is a problem with our values in DB
@@ -160,7 +160,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartDTO getCustomersCart() {
         String currentCustomerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Cart> cartList = cartRepository.findByCustomer_EmailAndCartState(currentCustomerEmail, CartState.CREATED);
+        List<Cart> cartList = cartRepository.findByUser_EmailAndCartState(currentCustomerEmail, CartState.CREATED);
 
         if (cartList == null || cartList.size() == 0) throw new CartNotFoundException("Cart cannot found for customer: "+currentCustomerEmail);
 

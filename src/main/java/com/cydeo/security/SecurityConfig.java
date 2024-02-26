@@ -1,10 +1,9 @@
 package com.cydeo.security;
 
 
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import com.cydeo.entity.principal.UserPrincipal;
-import com.cydeo.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
+import com.cydeo.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -28,10 +27,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final CustomerRepository repository;
+    private final UserRepository repository;
     private final JwtAuthenticationFilter jwtAuthFilter;
 
-    public SecurityConfig(CustomerRepository repository, @Lazy JwtAuthenticationFilter jwtAuthFilter) {
+    public SecurityConfig(UserRepository repository, @Lazy JwtAuthenticationFilter jwtAuthFilter) {
         this.repository = repository;
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -39,9 +38,9 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            Customer customer = repository.retrieveByCustomerEmail(username)
+            User user = repository.retrieveByCustomerEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new UserPrincipal(customer);
+            return new UserPrincipal(user);
         };
     }
 

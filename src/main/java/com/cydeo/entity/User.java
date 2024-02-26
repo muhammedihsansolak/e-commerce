@@ -11,8 +11,8 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 @NoArgsConstructor
-@Table(name = "customers")
-public class Customer extends BaseEntity {
+@Table(name = "users")
+public class User extends BaseEntity {
     private String firstName;
     private String lastName;
     private String userName;
@@ -22,9 +22,9 @@ public class Customer extends BaseEntity {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.CUSTOMER;
+    private Role role;
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "user")
     private List<Address> addressList;
 
 }

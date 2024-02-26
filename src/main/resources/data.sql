@@ -55,19 +55,22 @@ VALUES ('Watches');
 
 
 -- Sample Customers
-INSERT INTO public.customers (first_name, last_name, user_name, password, email, role)
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
+VALUES ('Admin', 'Admin', 'Admin', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK', 'admin@email.com',
+        'ADMIN');
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
 VALUES ('John', 'Doe', 'john_doe', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK', 'john.doe@email.com',
         'CUSTOMER');
-INSERT INTO public.customers (first_name, last_name, user_name, password, email, role)
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
 VALUES ('Alice', 'Smith', 'alice_smith', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK',
         'alice.smith@email.com', 'CUSTOMER');
-INSERT INTO public.customers (first_name, last_name, user_name, password, email, role)
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
 VALUES ('Max', 'Ian', 'max_ian', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK', 'maxIan@email.com',
         'CUSTOMER');
-INSERT INTO public.customers (first_name, last_name, user_name, password, email, role)
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
 VALUES ('Michael', 'Johnson', 'michaelj', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK',
         'michael.johnson@email.com', 'CUSTOMER');
-INSERT INTO public.customers (first_name, last_name, user_name, password, email, role)
+INSERT INTO public.users (first_name, last_name, user_name, password, email, role)
 VALUES ('Emily', 'Brown', 'emilyb', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK',
         'emily.brown@email.com', 'CUSTOMER'),
        ('Daniel', 'Wilson', 'dwilson', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQJKssDUwHXzDGUztNK',
@@ -84,11 +87,11 @@ VALUES ('Emily', 'Brown', 'emilyb', '$2a$10$nAB5j9G1c3JHgg7qzhiIXO7cqqr5oJ3LXRNQ
 
 
 -- Sample Addresses
-INSERT INTO public.addresses (name, zip_code, street, customer_id)
+INSERT INTO public.addresses (name, zip_code, street, user_id)
 VALUES ('Home', '12345', '123 Main St', 1);
-INSERT INTO public.addresses (name, zip_code, street, customer_id)
+INSERT INTO public.addresses (name, zip_code, street, user_id)
 VALUES ('Work', '67890', '456 Business St', 2);
-INSERT INTO public.addresses (name, zip_code, street, customer_id)
+INSERT INTO public.addresses (name, zip_code, street, user_id)
 VALUES
     ('Work', '34567', '789 Office St', 3),
     ('Home', '90123', '123 Corporate St', 4),
@@ -133,9 +136,9 @@ VALUES
     (6, 11);
 
 -- Sample Carts
-INSERT INTO public.carts (customer_id, discount_id, cart_state)
+INSERT INTO public.carts (user_id, discount_id, cart_state)
 VALUES (1, 1, 'CREATED');
-INSERT INTO public.carts (customer_id, discount_id, cart_state)
+INSERT INTO public.carts (user_id, discount_id, cart_state)
 VALUES (2, 2, 'CREATED');
 
 -- Sample Cart Items
@@ -145,9 +148,9 @@ INSERT INTO public.cart_items (product_id, quantity, cart_id)
 VALUES (2, 3, 2);
 
 -- Sample Balances
-INSERT INTO public.balances (customer_id, amount)
+INSERT INTO public.balances (user_id, amount)
 VALUES (1, 500.00);
-INSERT INTO public.balances (customer_id, amount)
+INSERT INTO public.balances (user_id, amount)
 VALUES
     (2, 1000.00),
     (3, 1000.00),
@@ -166,7 +169,7 @@ INSERT INTO public.payments (paid_price, payment_method)
 VALUES (200.00, 'BUY_NOW_PAY_LATER');
 
 -- Sample Orders
-INSERT INTO public.orders (cart_id, paid_price, total_price, customer_id, payment_id)
+INSERT INTO public.orders (cart_id, paid_price, total_price, user_id, payment_id)
 VALUES (1, 150.00, 199.99, 1, 1);
-INSERT INTO public.orders (cart_id, paid_price, total_price, customer_id, payment_id)
+INSERT INTO public.orders (cart_id, paid_price, total_price, user_id, payment_id)
 VALUES (2, 200.00, 249.97, 2, 2);

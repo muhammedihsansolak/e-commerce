@@ -42,7 +42,7 @@ class CartServiceImplUnitTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private CustomerRepository customerRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private CartServiceImpl cartService;
@@ -79,8 +79,8 @@ class CartServiceImplUnitTest {
 
         String nonExistingEmail = "abc@email.com";
 
-        Customer customer = new Customer();
-        customer.setEmail(nonExistingEmail);
+        User user = new User();
+        user.setEmail(nonExistingEmail);
 
         // Mocking the current authentication context with a custom Authentication object
         Authentication authentication = mock(Authentication.class);
@@ -88,7 +88,7 @@ class CartServiceImplUnitTest {
 
         when(productRepository.findByProductCode(anyString())).thenReturn(Optional.of(product));
         when(authentication.getName()).thenReturn(nonExistingEmail);
-        when(customerRepository.retrieveByCustomerEmail(nonExistingEmail)).thenReturn(Optional.empty());
+        when(userRepository.retrieveByCustomerEmail(nonExistingEmail)).thenReturn(Optional.empty());
 
         // Act and Assert
         assertThrows(CustomerNotFoundException.class, () -> cartService.addToCart("productCode", 1));
@@ -104,13 +104,13 @@ class CartServiceImplUnitTest {
 
         String existingEmail = "abc@email.com";
 
-        Customer customer = new Customer();
-        customer.setEmail(existingEmail);
-        customer.setId(1L);
+        User user = new User();
+        user.setEmail(existingEmail);
+        user.setId(1L);
 
         Cart cart = new Cart();
         cart.setCartState(CartState.CREATED);
-        cart.setCustomer(customer);
+        cart.setUser(user);
 
         List<Cart> cartList = new ArrayList<>();
         cartList.add(cart);
@@ -122,8 +122,8 @@ class CartServiceImplUnitTest {
 
         when(productRepository.findByProductCode(anyString())).thenReturn(Optional.of(product));
         when(authentication.getName()).thenReturn(existingEmail);
-        when(customerRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(userRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
         when(cartItemRepository.findAllByCartAndProduct(cart, product)).thenReturn(cartItem);
 
         assertTrue(cartService.addToCart("productCode", 5));
@@ -139,13 +139,13 @@ class CartServiceImplUnitTest {
 
         String existingEmail = "abc@email.com";
 
-        Customer customer = new Customer();
-        customer.setEmail(existingEmail);
-        customer.setId(1L);
+        User user = new User();
+        user.setEmail(existingEmail);
+        user.setId(1L);
 
         Cart cart = new Cart();
         cart.setCartState(CartState.CREATED);
-        cart.setCustomer(customer);
+        cart.setUser(user);
 
         List<Cart> cartList = new ArrayList<>();
 
@@ -156,8 +156,8 @@ class CartServiceImplUnitTest {
 
         when(productRepository.findByProductCode(anyString())).thenReturn(Optional.of(product));
         when(authentication.getName()).thenReturn(existingEmail);
-        when(customerRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(userRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
         when(cartRepository.save(cart)).thenReturn(cart);
         when(cartItemRepository.findAllByCartAndProduct(cart, product)).thenReturn(cartItem);
 
@@ -174,17 +174,17 @@ class CartServiceImplUnitTest {
 
         String existingEmail = "abc@email.com";
 
-        Customer customer = new Customer();
-        customer.setEmail(existingEmail);
-        customer.setId(1L);
+        User user = new User();
+        user.setEmail(existingEmail);
+        user.setId(1L);
 
         Cart cart1 = new Cart();
         cart1.setCartState(CartState.CREATED);
-        cart1.setCustomer(customer);
+        cart1.setUser(user);
 
         Cart cart2 = new Cart();
         cart1.setCartState(CartState.CREATED);
-        cart1.setCustomer(customer);
+        cart1.setUser(user);
 
         List<Cart> cartList = new ArrayList<>();
         cartList.add(cart1);
@@ -192,8 +192,8 @@ class CartServiceImplUnitTest {
 
         when(productRepository.findByProductCode(anyString())).thenReturn(Optional.of(product));
         when(authentication.getName()).thenReturn(existingEmail);
-        when(customerRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(userRepository.retrieveByCustomerEmail(existingEmail)).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
 
         Throwable throwable = catchThrowable(() -> cartService.addToCart("productCode", product.getRemainingQuantity() - 1));
         assertEquals( "Duplicate cart count. Check values on database" , throwable.getMessage());

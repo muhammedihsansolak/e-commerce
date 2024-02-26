@@ -3,7 +3,7 @@ package com.cydeo.service.Impl;
 import com.cydeo.client.CurrencyClient;
 import com.cydeo.entity.Cart;
 import com.cydeo.entity.CartItem;
-import com.cydeo.entity.Customer;
+import com.cydeo.entity.User;
 import com.cydeo.entity.Product;
 import com.cydeo.enums.CartState;
 import com.cydeo.exception.CustomerNotFoundException;
@@ -24,11 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +39,7 @@ class OrderServiceImplUnitTest {
     @Mock
     private CartRepository cartRepository;
     @Mock
-    private CustomerRepository customerRepository;
+    private UserRepository userRepository;
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
@@ -64,7 +61,7 @@ class OrderServiceImplUnitTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Customer customer = new Customer();
+        User user = new User();
 
         Cart cart = new Cart();
 
@@ -85,9 +82,9 @@ class OrderServiceImplUnitTest {
 
         BigDecimal cartTotalAmount = BigDecimal.valueOf(250);
 
-        when(authentication.getName()).thenReturn(customer.getEmail());
-        when(customerRepository.retrieveByCustomerEmail(customer.getEmail())).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(authentication.getName()).thenReturn(user.getEmail());
+        when(userRepository.retrieveByCustomerEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
         when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
         when(cartService.applyDiscountToCartIfApplicableAndCalculateDiscountAmount("ORMFRG",cart.getId())).thenReturn(BigDecimal.valueOf(50));
         when(cartService.calculateTotalCartAmount(cartItemList)).thenReturn(cartTotalAmount);
@@ -105,7 +102,7 @@ class OrderServiceImplUnitTest {
         String nonExistingEmail = "";
 
         when(authentication.getName()).thenReturn(nonExistingEmail);
-        when(customerRepository.retrieveByCustomerEmail(nonExistingEmail)).thenReturn(Optional.empty());
+        when(userRepository.retrieveByCustomerEmail(nonExistingEmail)).thenReturn(Optional.empty());
 
         Throwable throwable = catchThrowable(() -> orderService.placeOrder("Transfer", "ORMFRG"));
 
@@ -117,13 +114,13 @@ class OrderServiceImplUnitTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Customer customer = new Customer();
+        User user = new User();
 
         List<Cart> cartList = new ArrayList<>();
 
-        when(authentication.getName()).thenReturn(customer.getEmail());
-        when(customerRepository.retrieveByCustomerEmail(customer.getEmail())).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(authentication.getName()).thenReturn(user.getEmail());
+        when(userRepository.retrieveByCustomerEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
 
         Throwable throwable = catchThrowable(() -> orderService.placeOrder("Transfer", "ORMFRG"));
 
@@ -136,14 +133,14 @@ class OrderServiceImplUnitTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Customer customer = new Customer();
+        User user = new User();
 
         List<Cart> cartList = new ArrayList<>();
         cartList = null;
 
-        when(authentication.getName()).thenReturn(customer.getEmail());
-        when(customerRepository.retrieveByCustomerEmail(customer.getEmail())).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(authentication.getName()).thenReturn(user.getEmail());
+        when(userRepository.retrieveByCustomerEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
 
         Throwable throwable = catchThrowable(() -> orderService.placeOrder("Transfer", "ORMFRG"));
 
@@ -156,7 +153,7 @@ class OrderServiceImplUnitTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Customer customer = new Customer();
+        User user = new User();
 
         Cart cart = new Cart();
 
@@ -165,9 +162,9 @@ class OrderServiceImplUnitTest {
 
         List<CartItem> cartItemList = new ArrayList<>();
 
-        when(authentication.getName()).thenReturn(customer.getEmail());
-        when(customerRepository.retrieveByCustomerEmail(customer.getEmail())).thenReturn(Optional.of(customer));
-        when(cartRepository.findAllByCustomerIdAndCartState(customer.getId(), CartState.CREATED)).thenReturn(cartList);
+        when(authentication.getName()).thenReturn(user.getEmail());
+        when(userRepository.retrieveByCustomerEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(cartRepository.findAllByCustomerIdAndCartState(user.getId(), CartState.CREATED)).thenReturn(cartList);
         when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItemList);
 
         assertThat(orderService.placeOrder("Transfer", "ORMFRG")).isEqualTo(BigDecimal.ZERO);

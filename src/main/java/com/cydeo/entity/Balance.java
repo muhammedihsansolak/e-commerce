@@ -16,6 +16,6 @@ import java.math.BigDecimal;
 @Table(name = "balances")
 public class Balance extends BaseEntity{
     @OneToOne
-    private Customer customer;
+    private User user;
     private BigDecimal amount;
 }

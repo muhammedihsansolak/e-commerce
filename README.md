@@ -61,7 +61,7 @@
 
 ### Business Logics
 
-- **Unique Customer Emails:** Each customer's email must be unique within the system to ensure proper identification and communication.
+- **Unique Customer Emails:** Each user's email must be unique within the system to ensure proper identification and communication.
 
 - **Multiple Addresses per Customer:** Customers have the flexibility to store more than one address in the system, allowing for convenient shipping to various locations.
 
@@ -71,7 +71,7 @@
 
 - **Discounts:** Special discounts are available to customers based on their payment method. Choosing credit card payment grants a $10 discount, while selecting the balance option offers a $20 discount. Additionally, customers can apply unique discount codes provided by the system, which are categorized as either amount-based or rate-based discounts. These discounts are created by admin users and can be applied during checkout to reduce the total order amount.
 
-- **Currency Conversion:** Customers have the flexibility to view their orders in various currencies. The system automatically converts the order total into the customer's preferred currency using live exchange rate data, ensuring accurate and transparent pricing.
+- **Currency Conversion:** Customers have the flexibility to view their orders in various currencies. The system automatically converts the order total into the user's preferred currency using live exchange rate data, ensuring accurate and transparent pricing.
 
 By adhering to these business logics, the e-commerce application provides a seamless and personalized shopping experience for customers while maintaining efficient and reliable transaction processing.
 

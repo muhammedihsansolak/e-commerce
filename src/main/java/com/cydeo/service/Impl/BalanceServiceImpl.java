@@ -17,7 +17,7 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     public void decreaseCustomerBalance(Long customerId, BigDecimal paidPrice) {
 
-        Balance balance = balanceRepository.findByCustomer_Id(customerId);
+        Balance balance = balanceRepository.findByUser_Id(customerId);
 
         balance.setAmount( balance.getAmount().subtract(paidPrice) );
 

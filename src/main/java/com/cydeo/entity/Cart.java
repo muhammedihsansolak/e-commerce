@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Table(name = "carts")
 public class Cart extends BaseEntity{
     @ManyToOne
-    private Customer customer;
+    private User user;
     @ManyToOne
     private Discount discount;
     @Enumerated(EnumType.STRING)
