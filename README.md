@@ -1,7 +1,5 @@
 # E-commerce Project
 
-**Note:** I am currently working on this project.
-
 ### 📖 Information
 
 <ul style="list-style-type:disc">
